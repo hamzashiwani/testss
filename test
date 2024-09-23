@@ -1,0 +1,133 @@
+const { Team, User, Identity, Task, Note, Document, Alert, Tagging, AccountManager, TicketType, TicketStatus, LeadStatus, League } = require('./models'); // Adjust the import according to your project structure
+
+const globalSearch = async (req, res) => {
+    try {
+        const { search } = req.query; // Assuming search comes from query parameters
+
+        const data = {};
+
+        // Search teams
+        const teams = await Team.findAll({
+            include: ['addedBy', 'updatedBy', 'leagueRelation', 'accountManagerRelation'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.teams = teams;
+
+        // Search employees
+        const employees = await User.findAll({
+            include: ['addedBy', 'updatedBy'],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.users = employees;
+
+        // Search identities
+        const identities = await Identity.findAll({
+            include: ['addedBy', 'updatedBy', 'assignTo'],
+            order: [['id', 'DESC']],
+            where: {
+                type: 0,
+                ...(search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : {})
+            }
+        });
+        data.identities = identities;
+
+        // Search leads
+        const leads = await Identity.findAll({
+            include: ['addedBy', 'updatedBy', 'assignTo', 'status'],
+            order: [['id', 'DESC']],
+            where: {
+                type: 1,
+                ...(search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : {})
+            }
+        });
+        data.leads = leads;
+
+        // Search tasks
+        const tasks = await Task.findAll({
+            include: ['addedBy', 'updatedBy', 'assignTo'],
+            order: [['id', 'DESC']],
+            where: search ? { title: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.tasks = tasks;
+
+        // Search notes
+        const notes = await Note.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { title: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.notes = notes;
+
+        // Search documents
+        const documents = await Document.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.documents = documents;
+
+        // Search alerts
+        const alerts = await Alert.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.alerts = alerts;
+
+        // Search tagging
+        const tagging = await Tagging.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.tagging = tagging;
+
+        // Search account managers
+        const managers = await AccountManager.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.account_manager = managers;
+
+        // Search ticket types
+        const ticketTypes = await TicketType.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { title: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.ticket_types = ticketTypes;
+
+        // Search ticket statuses
+        const ticketStatuses = await TicketStatus.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { title: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.ticket_status = ticketStatuses;
+
+        // Search lead statuses
+        const leadStatuses = await LeadStatus.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { title: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.lead_status = leadStatuses;
+
+        // Search leagues
+        const leagues = await League.findAll({
+            include: ['addedBy', 'updatedBy'],
+            order: [['id', 'DESC']],
+            where: search ? { name: { [Sequelize.Op.like]: `%${search}%` } } : undefined
+        });
+        data.leaguegs = leagues;
+
+        return res.status(200).json({ success: true, data, message: 'Retrieved successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { globalSearch };
